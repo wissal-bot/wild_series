@@ -16,8 +16,8 @@ class Episode
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $title = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $number = null;
+    // #[ORM\Column(nullable: true)]
+    private ?int $number = 0;
 
     #[ORM\ManyToOne(inversedBy: 'episode')]
     #[ORM\JoinColumn(nullable: false)]
@@ -40,12 +40,12 @@ class Episode
         return $this;
     }
 
-    public function getNumber(): ?int
+    public function getNumber(): int
     {
         return $this->number;
     }
 
-    public function setNumber(?int $number): static
+    public function setNumber(int $number): static
     {
         $this->number = $number;
 

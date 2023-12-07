@@ -4,27 +4,32 @@ namespace App\DataFixtures;
 
 use App\Entity\Season;
 use Doctrine\Bundle\FixturesBundle\Fixture;
-use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
+
+//Tout d'abord nous ajoutons la classe Factory de FakerPhp
+use Faker\Factory;
 
 class SeasonFixtures extends Fixture implements DependentFixtureInterface
 {
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
-        // Assume that 'program_existing' is the reference for your existing program
-        $program = $this->getReference('program_existing');
-
+        $faker = Factory::create();
+        foreach (ProgramFixtures::PROGRAMS as $key => $programData) {
+            for ($i= 1; $i <= 5; $i++) {
         $season = new Season();
-        $season->setNumber(1);
-        $season->setProgram($program);
+        $season ->setNumber($faker->numberBetween(1, 5))
+                ->setProgram($this->getReference('program_' . $programData['title']));
+        $this->addReference('season_' . $i . '_' . $key, $season);
         $manager->persist($season);
-        $this->addReference('season1_existing', $season);
+            }
+        }
         $manager->flush();
     }
-    public function getDependencies()
+    public function getDependencies(): array
     {
         return [
-          ProgramFixtures::class,
+           ProgramFixtures::class,
         ];
     }
 }

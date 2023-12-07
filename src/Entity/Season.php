@@ -16,8 +16,8 @@ class Season
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $number = null;
+    // #[ORM\Column(nullable: true)]
+    private ?int $number = 0;
 
     #[ORM\ManyToOne(inversedBy: 'season')]
     #[ORM\JoinColumn(nullable: false)]
@@ -36,12 +36,12 @@ class Season
         return $this->id;
     }
 
-    public function getNumber(): ?int
+    public function getNumber(): int
     {
         return $this->number;
     }
 
-    public function setNumber(?int $number): static
+    public function setNumber(int $number): static
     {
         $this->number = $number;
 

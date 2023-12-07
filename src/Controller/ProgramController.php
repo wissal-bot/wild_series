@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Program;
 use App\Repository\ProgramRepository;
+use App\Repository\SeasonRepository;
+use App\Repository\EpisodeRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -11,7 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class ProgramController extends AbstractController
 {
 
-    #[Route('/', name: 'index')]
+    #[Route('/', name: 'program_index')]
     public function indexProgram(ProgramRepository $programRepository): Response
     {
         $programs = $programRepository->findAll();
@@ -22,21 +24,10 @@ class ProgramController extends AbstractController
         );
     }
 
-    #[Route('/program/', name: 'program_index')]
-      public function index(ProgramRepository $programRepository): Response
-    {
-        $programs = $programRepository->findAll();
-        return $this->render('program/index.html.twig', [
-            'programs' => $programs
-         ]);
-    }
-
-    #[Route('/show/{id<^[0-9]+$>}', name: 'program_show')]
+    #[Route('/show/{id}', requirements:['id'=>'\d+'], name: 'program_show')]
     public function show(int $id, ProgramRepository $programRepository):Response
     {
         $program = $programRepository->findOneBy(['id' => $id]);
-        // same as $program = $programRepository->find($id);
-
         if (!$program) {
             throw $this->createNotFoundException(
                 'No program with id : '.$id.' found in program\'s table.'
@@ -45,20 +36,23 @@ class ProgramController extends AbstractController
         return $this->render('program/show.html.twig', ['program' => $program]);
     }
 
-     #[Route("/program/{id}", name: 'program_show')]
-    public function showEpisode(int $id, ProgramRepository $episodRepository): Response
+    #[Route("/program/{programId}/season/{seasonId}", name: 'program_season_show')]
+    public function showSeason(ProgramRepository $programRepository, int $programId, SeasonRepository $seasonRepository, int $seasonId, EpisodeRepository $episodeRepository): Response
     {
-        $episod = $episodRepository->find($id);
+        $program = $programRepository->findOneById($programId);
+        $season = $seasonRepository->findOneById($seasonId);
+        $episodesBySeason = $episodeRepository->findBySeason($season);
 
-        return $this->render('program/show.html.twig', ['episod' => $episod]);
+        return $this->render('program/season_show.html.twig', ['program' => $program, 'season' => $season, 'episodes' => $episodesBySeason]);
     }
 
-    #[Route("/program/{programId}/season/{seasonId}", name: 'program_season_show')]
-    public function showSeason(int $id, ProgramRepository $programId, ProgramRepository $seasonId): Response
+    #[Route("/program/{programId}/season/{seasonId}/episode/{episodeId}", name: 'program_season_episode_show')]
+    public function showAll(ProgramRepository $programRepository, int $programId, SeasonRepository $seasonRepository, int $seasonId, EpisodeRepository $episodeRepository, int $episodeId): Response
     {
-        $programSeason = $programId->find($id);
-        $season = $seasonId->find($id);
+        $program = $programRepository->findOneById($programId);
+        $season = $seasonRepository->findOneById($seasonId);
+        $episodes = $episodeRepository->findOneById($episodeId);
 
-        return $this->render('program/season_show.html.twig', ['programSeason' => $programSeason, 'season' => $season]);
+        return $this->render('program/episode_show.html.twig', ['program' => $program, 'season' => $season, 'episodes' => $episodes]);
     }
 }
